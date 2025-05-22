@@ -18,7 +18,7 @@ vec4 mainImage(vec2 vUV) { // main
         upperBoundx = 0.5;
     } else if (t > -0.5) {
         lowerBoundx = 0.5;
-        upperBoundx = 0.1;
+        upperBoundx = 1;
     } else {
         lowerBoundx = 0.5;
         upperBoundx = 1.0;
