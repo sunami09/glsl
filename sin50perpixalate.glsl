@@ -3,10 +3,10 @@
 uniform sampler2D input; // main
 // { "default": 0.05, "name": "Block Size", "min": 0.001, "max": 0.2 }
 uniform float blockSize;
-uniform float itime;
+uniform float time;
 
 vec4 mainImage(vec2 vUV) { // main
-    float t = sin(itime); 
+    float t = sin(time); 
 
     float lowerBoundx, upperBoundx, lowerBoundy, upperBoundy;
 
