@@ -37,7 +37,7 @@ vec4 mainImage(vec2 vUV) { // main
         lowerBoundy = 0.0;
         upperBoundy = 0.5;
     }
-    if ((vUV.x > lowerBoundx && vUV.x < upperBoundx) && vUV.y > lowerBoundy && vUV.y < lowerBoundy) {
+    if ((vUV.x > lowerBoundx && vUV.x < upperBoundx) && (vUV.y > lowerBoundy && vUV.y < upperBoundy)) {
         vec2 gridUV = floor(vUV / blockSize) * blockSize + blockSize * 0.5;
         return texture(input, gridUV);
     }
