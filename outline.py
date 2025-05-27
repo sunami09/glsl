@@ -7,7 +7,7 @@ blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 edges = cv2.Canny(blurred, 50, 150)
 
 
-kernel = np.ones((3, 3), np.uint8)  
+kernel = np.ones((2, 2), np.uint8)  
 thick_edges = cv2.dilate(edges, kernel, iterations=1)
 
-cv2.imwrite("shirt_outline_thick.png", thick_edges)
+cv2.imwrite("shirt_outline_thick3.png", thick_edges)
