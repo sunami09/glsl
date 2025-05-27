@@ -9,7 +9,7 @@ uniform float glowStrength;
 // { "default": [1.0, 0.0, 1.0], "name": "Glow Color" }
 uniform vec3 glowColor;
 
-vec4 mainImage(vec2 vUV) {
+vec4 mainImage(vec2 vUV) { // main
     vec4 base = texture(input, vUV);
     float outline = texture(outlineMap, vUV).r; // assuming grayscale in red channel
 
