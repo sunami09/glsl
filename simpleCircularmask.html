@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelation Formula Explained</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .grid-demo {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .example {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        .formula {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        canvas {
+            border: 2px solid #333;
+            display: block;
+            margin: 10px 0;
+        }
+        .interactive {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .value-display {
+            font-family: monospace;
+            color: #0066cc;
+            font-weight: bold;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #fff;
+            border-left: 4px solid #0066cc;
+        }
+        .math-example {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Pixelation Formula Explained</h1>
+        
+        <div class="formula">
+            vec2 gridUV = floor(vUV / blockSize) * blockSize + blockSize * 0.5;
+        </div>
+
+        <h2>What's happening step by step:</h2>
+
+        <div class="example">
+            <h3>📐 Mathematical Example</h3>
+            <p>Let's say we have:</p>
+            <ul>
+                <li><strong>vUV</strong> = (0.37, 0.68) - a pixel position</li>
+                <li><strong>blockSize</strong> = 0.1 - making a 10×10 grid</li>
+            </ul>
+
+            <div class="step">
+                <strong>Step 1: Divide by blockSize</strong>
+                <div class="math-example">
+                    vUV / blockSize = (0.37, 0.68) / 0.1 = (3.7, 6.8)
+                </div>
+                <p>This tells us we're in the 3.7th column and 6.8th row</p>
+            </div>
+
+            <div class="step">
+                <strong>Step 2: Floor (round down)</strong>
+                <div class="math-example">
+                    floor(3.7, 6.8) = (3, 6)
+                </div>
+                <p>Now we know we're in grid cell [3,6]</p>
+            </div>
+
+            <div class="step">
+                <strong>Step 3: Multiply back by blockSize</strong>
+                <div class="math-example">
+                    (3, 6) * 0.1 = (0.3, 0.6)
+                </div>
+                <p>This gives us the bottom-left corner of our grid cell</p>
+            </div>
+
+            <div class="step">
+                <strong>Step 4: Add half blockSize</strong>
+                <div class="math-example">
+                    (0.3, 0.6) + 0.1 * 0.5 = (0.3, 0.6) + (0.05, 0.05) = (0.35, 0.65)
+                </div>
+                <p>This gives us the CENTER of the grid cell! ✨</p>
+            </div>
+        </div>
+
+        <h2>🎨 Visual Examples</h2>
+        
+        <div class="grid-demo">
+            <div>
+                <h3>Original Coordinates</h3>
+                <canvas id="canvas1" width="300" height="300"></canvas>
+                <p>Each dot = original pixel position</p>
+            </div>
+            
+            <div>
+                <h3>After Pixelation</h3>
+                <canvas id="canvas2" width="300" height="300"></canvas>
+                <p>All pixels snap to grid centers</p>
+            </div>
+        </div>
+
+        <div class="interactive">
+            <h2>🎮 Interactive Demo</h2>
+            <p>Move your mouse over the canvas to see how pixels snap to grid:</p>
+            <canvas id="interactiveCanvas" width="600" height="400"></canvas>
+            
+            <label>Block Size: <span class="value-display" id="blockSizeDisplay">0.1</span></label>
+            <input type="range" id="blockSizeSlider" min="0.02" max="0.2" step="0.01" value="0.1">
+            
+            <div id="coordinates" style="margin-top: 15px;">
+                <p><strong>Mouse UV:</strong> <span class="value-display" id="mouseUV">(0.00, 0.00)</span></p>
+                <p><strong>Grid Cell:</strong> <span class="value-display" id="gridCell">[0, 0]</span></p>
+                <p><strong>Snapped UV:</strong> <span class="value-display" id="snappedUV">(0.00, 0.00)</span></p>
+            </div>
+        </div>
+
+        <div class="example">
+            <h2>🤔 Why Add 0.5 × blockSize?</h2>
+            <p>Without adding half the block size, we'd sample from the corner of each block. This would create a shifted, awkward look. By adding 0.5 × blockSize, we sample from the CENTER of each block, creating a proper pixelated effect.</p>
+            
+            <canvas id="comparisonCanvas" width="600" height="300"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        // Draw original coordinates grid
+        const canvas1 = document.getElementById('canvas1');
+        const ctx1 = canvas1.getContext('2d');
+        
+        ctx1.fillStyle = '#f0f0f0';
+        ctx1.fillRect(0, 0, 300, 300);
+        
+        // Draw grid lines
+        ctx1.strokeStyle = '#ccc';
+        ctx1.lineWidth = 1;
+        for (let i = 0; i <= 10; i++) {
+            const pos = i * 30;
+            ctx1.beginPath();
+            ctx1.moveTo(pos, 0);
+            ctx1.lineTo(pos, 300);
+            ctx1.moveTo(0, pos);
+            ctx1.lineTo(300, pos);
+            ctx1.stroke();
+        }
+        
+        // Draw sample points
+        ctx1.fillStyle = '#0066cc';
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 300;
+            const y = Math.random() * 300;
+            ctx1.beginPath();
+            ctx1.arc(x, y, 3, 0, Math.PI * 2);
+            ctx1.fill();
+        }
+        
+        // Draw pixelated version
+        const canvas2 = document.getElementById('canvas2');
+        const ctx2 = canvas2.getContext('2d');
+        
+        ctx2.fillStyle = '#f0f0f0';
+        ctx2.fillRect(0, 0, 300, 300);
+        
+        // Draw grid
+        ctx2.strokeStyle = '#ccc';
+        ctx2.lineWidth = 1;
+        for (let i = 0; i <= 10; i++) {
+            const pos = i * 30;
+            ctx2.beginPath();
+            ctx2.moveTo(pos, 0);
+            ctx2.lineTo(pos, 300);
+            ctx2.moveTo(0, pos);
+            ctx2.lineTo(300, pos);
+            ctx2.stroke();
+        }
+        
+        // Draw snapped points
+        ctx2.fillStyle = '#cc0066';
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 300;
+            const y = Math.random() * 300;
+            
+            // Apply pixelation formula
+            const blockSize = 30; // 30 pixels = 0.1 in UV space
+            const gridX = Math.floor(x / blockSize) * blockSize + blockSize * 0.5;
+            const gridY = Math.floor(y / blockSize) * blockSize + blockSize * 0.5;
+            
+            ctx2.beginPath();
+            ctx2.arc(gridX, gridY, 5, 0, Math.PI * 2);
+            ctx2.fill();
+        }
+        
+        // Interactive canvas
+        const interactiveCanvas = document.getElementById('interactiveCanvas');
+        const ctxInt = interactiveCanvas.getContext('2d');
+        const blockSizeSlider = document.getElementById('blockSizeSlider');
+        const blockSizeDisplay = document.getElementById('blockSizeDisplay');
+        const mouseUVDisplay = document.getElementById('mouseUV');
+        const gridCellDisplay = document.getElementById('gridCell');
+        const snappedUVDisplay = document.getElementById('snappedUV');
+        
+        let mouseX = 0, mouseY = 0;
+        let blockSize = 0.1;
+        
+        function drawInteractive() {
+            ctxInt.fillStyle = '#f8f8f8';
+            ctxInt.fillRect(0, 0, 600, 400);
+            
+            const pixelBlockSize = blockSize * 600;
+            
+            // Draw grid
+            ctxInt.strokeStyle = '#ddd';
+            ctxInt.lineWidth = 1;
+            for (let x = 0; x <= 600; x += pixelBlockSize) {
+                ctxInt.beginPath();
+                ctxInt.moveTo(x, 0);
+                ctxInt.lineTo(x, 400);
+                ctxInt.stroke();
+            }
+            for (let y = 0; y <= 400; y += pixelBlockSize * 400/600) {
+                ctxInt.beginPath();
+                ctxInt.moveTo(0, y);
+                ctxInt.lineTo(600, y);
+                ctxInt.stroke();
+            }
+            
+            if (mouseX >= 0 && mouseY >= 0) {
+                // Calculate UV coordinates
+                const uvX = mouseX / 600;
+                const uvY = mouseY / 400;
+                
+                // Apply pixelation formula
+                const gridX = Math.floor(uvX / blockSize);
+                const gridY = Math.floor(uvY / blockSize);
+                const snappedX = gridX * blockSize + blockSize * 0.5;
+                const snappedY = gridY * blockSize + blockSize * 0.5;
+                
+                // Highlight current grid cell
+                ctxInt.fillStyle = 'rgba(0, 102, 204, 0.2)';
+                ctxInt.fillRect(gridX * pixelBlockSize, gridY * pixelBlockSize * 400/600, 
+                               pixelBlockSize, pixelBlockSize * 400/600);
+                
+                // Draw original position
+                ctxInt.fillStyle = '#0066cc';
+                ctxInt.beginPath();
+                ctxInt.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
+                ctxInt.fill();
+                ctxInt.fillText('Original', mouseX + 10, mouseY - 10);
+                
+                // Draw snapped position
+                ctxInt.fillStyle = '#cc0066';
+                ctxInt.beginPath();
+                ctxInt.arc(snappedX * 600, snappedY * 400, 8, 0, Math.PI * 2);
+                ctxInt.fill();
+                ctxInt.fillText('Snapped', snappedX * 600 + 10, snappedY * 400 - 10);
+                
+                // Draw line between them
+                ctxInt.strokeStyle = '#666';
+                ctxInt.setLineDash([5, 5]);
+                ctxInt.beginPath();
+                ctxInt.moveTo(mouseX, mouseY);
+                ctxInt.lineTo(snappedX * 600, snappedY * 400);
+                ctxInt.stroke();
+                ctxInt.setLineDash([]);
+                
+                // Update displays
+                mouseUVDisplay.textContent = `(${uvX.toFixed(2)}, ${uvY.toFixed(2)})`;
+                gridCellDisplay.textContent = `[${gridX}, ${gridY}]`;
+                snappedUVDisplay.textContent = `(${snappedX.toFixed(2)}, ${snappedY.toFixed(2)})`;
+            }
+        }
+        
+        interactiveCanvas.addEventListener('mousemove', (e) => {
+            const rect = interactiveCanvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+            drawInteractive();
+        });
+        
+        interactiveCanvas.addEventListener('mouseleave', () => {
+            mouseX = -1;
+            mouseY = -1;
+            drawInteractive();
+        });
+        
+        blockSizeSlider.addEventListener('input', (e) => {
+            blockSize = parseFloat(e.target.value);
+            blockSizeDisplay.textContent = blockSize.toFixed(2);
+            drawInteractive();
+        });
+        
+        // Comparison canvas
+        const compCanvas = document.getElementById('comparisonCanvas');
+        const ctxComp = compCanvas.getContext('2d');
+        
+        // Draw "without 0.5" on left
+        ctxComp.fillStyle = '#f8f8f8';
+        ctxComp.fillRect(0, 0, 300, 300);
+        ctxComp.fillStyle = '#333';
+        ctxComp.font = '16px Arial';
+        ctxComp.fillText('Without + 0.5 (sampling corners)', 50, 30);
+        
+        // Draw grid and corner samples
+        for (let x = 0; x < 5; x++) {
+            for (let y = 0; y < 5; y++) {
+                const px = x * 50 + 25;
+                const py = y * 50 + 50;
+                
+                ctxComp.strokeStyle = '#ccc';
+                ctxComp.strokeRect(px, py, 50, 50);
+                
+                ctxComp.fillStyle = '#cc0000';
+                ctxComp.beginPath();
+                ctxComp.arc(px, py, 4, 0, Math.PI * 2);
+                ctxComp.fill();
+            }
+        }
+        
+        // Draw "with 0.5" on right
+        ctxComp.fillStyle = '#333';
+        ctxComp.fillText('With + 0.5 (sampling centers)', 350, 30);
+        
+        // Draw grid and center samples
+        for (let x = 0; x < 5; x++) {
+            for (let y = 0; y < 5; y++) {
+                const px = x * 50 + 325;
+                const py = y * 50 + 50;
+                
+                ctxComp.strokeStyle = '#ccc';
+                ctxComp.strokeRect(px, py, 50, 50);
+                
+                ctxComp.fillStyle = '#00cc00';
+                ctxComp.beginPath();
+                ctxComp.arc(px + 25, py + 25, 4, 0, Math.PI * 2);
+                ctxComp.fill();
+            }
+        }
+        
+        drawInteractive();
+    </script>
+</body>
+</html>
